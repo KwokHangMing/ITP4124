@@ -164,4 +164,3 @@ resource "azurerm_subnet" "staticweb_subnet2" {
     }
   }
 }
-
