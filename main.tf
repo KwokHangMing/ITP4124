@@ -50,14 +50,6 @@ resource "azurerm_storage_account" "staticweb" {
   }
 }
 
-
-
-# resource "azurerm_storage_container" "staticweb" {
-#   name                  = "$web"
-#   storage_account_name  = azurerm_storage_account.staticweb.name
-#   container_access_type = "blob"
-# }
-
 resource "azurerm_storage_blob" "staticweb_index" {
   name                   = "index.html"
   storage_account_name   = azurerm_storage_account.staticweb.name
@@ -132,28 +124,6 @@ resource "azurerm_subnet" "azfunction_subnet2" {
   }
 }
 
-# resource "azurerm_app_service_plan" "example" {
-#   name                = "example-app-service-plan"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-
-#   sku {
-#     tier = "Standard"
-#     size = "S1"
-#   }
-# }
-
-# resource "azurerm_app_service" "example" {
-#   name                = "example-app-service"
-#   location            = azurerm_resource_group.example.location
-#   resource_group_name = azurerm_resource_group.example.name
-#   app_service_plan_id = azurerm_app_service_plan.example.id
-# }
-
-# resource "azurerm_app_service_virtual_network_swift_connection" "example" {
-#   app_service_id = azurerm_app_service.example.id
-#   subnet_id      = azurerm_subnet.example.id
-# }
 
 #static web virtual network
 resource "azurerm_virtual_network" "staticweb_network" {
