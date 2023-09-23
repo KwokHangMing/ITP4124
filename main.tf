@@ -180,6 +180,122 @@ resource "azurerm_subnet_route_table_association" "projProd_routeTable_associati
 }
 
 resource "azurerm_subnet_route_table_association" "projProd_routeTable_association2" {
+  subnet_id      = azurerm_subnet.azfunction_subnet2.id
+  route_table_id = azurerm_route_table.projProd_routeTable.id
+}
+
+resource "azurerm_subnet_route_table_association" "projProd_routeTable_association3" {
   subnet_id      = azurerm_subnet.staticweb_subnet1.id
   route_table_id = azurerm_route_table.projProd_routeTable2.id
+}
+
+resource "azurerm_subnet_route_table_association" "projProd_routeTable_association4" {
+  subnet_id      = azurerm_subnet.staticweb_subnet2.id
+  route_table_id = azurerm_route_table.projProd_routeTable2.id
+}
+# NAT Gateway
+resource "azurerm_public_ip" "azfunction_publicIP" {
+  name                = "azfunction_publicIP"
+  location            = azurerm_storage_account.azfunction.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  zones               = ["1"]
+}
+
+resource "azurerm_public_ip_prefix" "azfunction_publicIPPrefix" {
+  name                = "azfunction_publicIPPrefix"
+  location            = azurerm_storage_account.azfunction.location
+  resource_group_name = azurerm_resource_group.rg.name
+  prefix_length       = 30
+  zones               = ["1"]
+}
+
+resource "azurerm_nat_gateway" "azfunction_natGateway" {
+  name                    = "nat-Gateway"
+  location                = azurerm_storage_account.azfunction.location
+  resource_group_name     = azurerm_resource_group.rg.name
+  sku_name                = "Standard"
+  idle_timeout_in_minutes = 10
+  zones                   = ["1"]
+}
+
+resource "azurerm_nat_gateway_public_ip_prefix_association" "azfunction_natGateway_association" {
+  nat_gateway_id      = azurerm_nat_gateway.azfunction_natGateway.id
+  public_ip_prefix_id = azurerm_public_ip_prefix.azfunction_publicIPPrefix.id
+}
+
+resource "azurerm_nat_gateway_public_ip_association" "azfunction_natGateway_association2" {
+  nat_gateway_id       = azurerm_nat_gateway.azfunction_natGateway.id
+  public_ip_address_id = azurerm_public_ip.azfunction_publicIP.id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "azfunction_natGateway_association3" {
+  subnet_id      = azurerm_subnet.azfunction_subnet1.id
+  nat_gateway_id = azurerm_nat_gateway.azfunction_natGateway.id
+}
+
+#Network Peering
+
+resource "azurerm_virtual_network_peering" "azfunction_to_staticweb" {
+  name                         = "azfunction_to_staticweb"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.azfunction_network.name
+  remote_virtual_network_id    = azurerm_virtual_network.staticweb_network.id
+  allow_forwarded_traffic      = "true"
+  allow_virtual_network_access = "true"
+  allow_gateway_transit        = "false"
+}
+
+resource "azurerm_virtual_network_peering" "staticweb_to_azfunction" {
+  name                         = "staticweb_to_azfunction"
+  resource_group_name          = azurerm_resource_group.rg.name
+  virtual_network_name         = azurerm_virtual_network.staticweb_network.name
+  remote_virtual_network_id    = azurerm_virtual_network.azfunction_network.id
+  allow_forwarded_traffic      = "true"
+  allow_virtual_network_access = "true"
+  allow_gateway_transit        = "false"
+}
+
+# Security Rules
+
+resource "azurerm_network_security_group" "projVnet1Prod_security_group" {
+  name                = "NetworkSecurityGroup"
+  location            = azurerm_storage_account.azfunction.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+# allow connections to HTTP from anywhere
+resource "azurerm_network_security_rule" "projVnet1Prod_security_rule1" {
+  name                         = "ProjVnet1Prod_security_rule1"
+  priority                     = 201
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  source_address_prefix        = "*"
+  destination_port_range       = "80"
+  destination_address_prefixes = [0]
+  resource_group_name          = azurerm_resource_group.rg.name
+  network_security_group_name  = azurerm_network_security_group.projVnet1Prod_security_group.name
+}
+
+#allow all TCP outbound traffic to anywhere
+resource "azurerm_network_security_rule" "projVnet1Prod_security_rule2" {
+  name                        = "ProjVnet1Prod_security_rule2"
+  priority                    = 100
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  source_address_prefix       = "*"
+  destination_port_range      = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.projVnet1Prod_security_group.name
+}
+
+resource "azurerm_subnet_network_security_group_association" "projVnet1Prod_security_group_association" {
+  subnet_id                 = azurerm_subnet.azfunction_subnet1.id
+  network_security_group_id = azurerm_network_security_group.projVnet1Prod_security_group.id
 }
