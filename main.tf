@@ -93,35 +93,17 @@ resource "azurerm_virtual_network" "azfunction_network" {
 }
 
 resource "azurerm_subnet" "azfunction_subnet1" {
-  name                 = "azfunction_subnet1"
+  name                 = "projVnet1Prod_subnet1"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.azfunction_network.name
   address_prefixes     = ["10.0.1.0/24"]
-
-  delegation {
-    name = "example-delegation"
-
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
 }
 
 resource "azurerm_subnet" "azfunction_subnet2" {
-  name                 = "azfunction_subnet2"
+  name                 = "projVnet1Prod_subnet2"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.azfunction_network.name
   address_prefixes     = ["10.0.0.0/24"]
-
-  delegation {
-    name = "example-delegation"
-
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
 }
 
 
@@ -134,33 +116,70 @@ resource "azurerm_virtual_network" "staticweb_network" {
 }
 
 resource "azurerm_subnet" "staticweb_subnet1" {
-  name                 = "staticweb_subnet1"
+  name                 = "projVnet2Prod_subnet1"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.staticweb_network.name
   address_prefixes     = ["10.1.1.0/24"]
-
-  delegation {
-    name = "example-delegation"
-
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
 }
 
 resource "azurerm_subnet" "staticweb_subnet2" {
-  name                 = "staticweb_subnet2"
+  name                 = "projVnet2Prod_subnet2"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.staticweb_network.name
   address_prefixes     = ["10.1.0.0/24"]
+}
 
-  delegation {
-    name = "example-delegation"
 
-    service_delegation {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
+resource "azurerm_route_table" "projProd_routeTable" {
+  name                = "RouteTable"
+  location            = azurerm_virtual_network.azfunction_network.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_route" "projVnet1Prod_route" {
+  name                = "projVnet1Prod_route1"
+  resource_group_name = azurerm_resource_group.rg.name
+  route_table_name    = azurerm_route_table.projProd_routeTable.name
+  address_prefix      = "10.0.0.0/16"
+  next_hop_type       = "VnetLocal"
+}
+
+resource "azurerm_route" "projVnet1Prod_route2" {
+  name                = "projVnet1Prod_route2"
+  resource_group_name = azurerm_resource_group.rg.name
+  route_table_name    = azurerm_route_table.projProd_routeTable.name
+  address_prefix      = "0.0.0.0/0"
+  next_hop_type       = "Internet"
+}
+
+resource "azurerm_route_table" "projProd_routeTable2" {
+  name                = "RouteTable2"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+}
+
+resource "azurerm_route" "projVnet2Prod_route" {
+  name                = "projVnet2Prod_route1"
+  resource_group_name = azurerm_resource_group.rg.name
+  route_table_name    = azurerm_route_table.projProd_routeTable2.name
+  address_prefix      = "10.1.0.0/16"
+  next_hop_type       = "VnetLocal"
+}
+
+resource "azurerm_route" "projVnet2Prod_route2" {
+  name                = "projVnet2Prod_route2"
+  resource_group_name = azurerm_resource_group.rg.name
+  route_table_name    = azurerm_route_table.projProd_routeTable2.name
+  address_prefix      = "0.0.0.0/0"
+  next_hop_type       = "Internet"
+}
+
+resource "azurerm_subnet_route_table_association" "projProd_routeTable_association" {
+  subnet_id      = azurerm_subnet.azfunction_subnet1.id
+  route_table_id = azurerm_route_table.projProd_routeTable.id
+}
+
+resource "azurerm_subnet_route_table_association" "projProd_routeTable_association2" {
+  subnet_id      = azurerm_subnet.staticweb_subnet1.id
+  route_table_id = azurerm_route_table.projProd_routeTable2.id
 }
