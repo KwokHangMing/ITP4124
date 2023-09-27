@@ -295,36 +295,74 @@ resource "azurerm_subnet_network_security_group_association" "projVnet1Prod_secu
 
 #Task 17
 
+# resource "azurerm_network_security_group" "projVnet2Prod_security_group" {
+#   name                = "projVnet2Prod_security_group"
+#   location            = azurerm_storage_account.staticweb.location
+#   resource_group_name = azurerm_resource_group.rg.name
+#   security_rule {
+#     name                         = "projVnet2Prod_security_rule1"
+#     priority                     = 201
+#     direction                    = "Inbound"
+#     access                       = "Allow"
+#     protocol                     = "Tcp"
+#     source_port_range            = "*"
+#     destination_port_range       = "80"
+#     source_address_prefix        = "10.1.0.0/24"
+#     destination_address_prefixes = azurerm_subnet.staticweb_subnet1.address_prefixes
+#   }
+
+#   security_rule {
+#     name                       = "projVnet2Prod_security_rule2"
+#     priority                   = 100
+#     direction                  = "Outbound"
+#     access                     = "Allow"
+#     protocol                   = "Tcp"
+#     source_port_range          = "*"
+#     destination_port_range     = "*"
+#     source_address_prefix      = "*"
+#     destination_address_prefix = "*"
+#   }
+# }
+# resource "azurerm_subnet_network_security_group_association" "projVnet2Prod_security_group_association" {
+#   subnet_id                 = azurerm_subnet.staticweb_subnet1.id
+#   network_security_group_id = azurerm_network_security_group.projVnet2Prod_security_group.id
+# }
+
 resource "azurerm_network_security_group" "projVnet2Prod_security_group" {
   name                = "projVnet2Prod_security_group"
   location            = azurerm_storage_account.staticweb.location
   resource_group_name = azurerm_resource_group.rg.name
-  security_rule {
-    name                         = "projVnet2Prod_security_rule1"
-    priority                     = 201
-    direction                    = "Inbound"
-    access                       = "Allow"
-    protocol                     = "Tcp"
-    source_port_range            = "*"
-    destination_port_range       = "80"
-    source_address_prefixes      = azurerm_subnet.staticweb_subnet2.address_prefixes
-    destination_address_prefixes = azurerm_subnet.staticweb_subnet1.address_prefixes
-  }
-
-  security_rule {
-    name                       = "projVnet2Prod_security_rule2"
-    priority                   = 100
-    direction                  = "Outbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "*"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
 }
+
+resource "azurerm_network_security_rule" "projVnet2Prod_security_rule1" {
+  name                         = "projVnet2Prod_security_rule1"
+  priority                     = 201
+  direction                    = "Inbound"
+  access                       = "Allow"
+  protocol                     = "Tcp"
+  source_port_range            = "*"
+  destination_port_range       = "80"
+  source_address_prefix        = "10.1.0.0/24"
+  destination_address_prefixes = azurerm_subnet.staticweb_subnet1.address_prefixes
+  resource_group_name          = azurerm_resource_group.rg.name
+  network_security_group_name  = azurerm_network_security_group.projVnet2Prod_security_group.name
+}
+
+resource "azurerm_network_security_rule" "projVnet2Prod_security_rule2" {
+  name                        = "projVnet2Prod_security_rule2"
+  priority                    = 100
+  direction                   = "Outbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.rg.name
+  network_security_group_name = azurerm_network_security_group.projVnet2Prod_security_group.name
+}
+
 resource "azurerm_subnet_network_security_group_association" "projVnet2Prod_security_group_association" {
   subnet_id                 = azurerm_subnet.staticweb_subnet1.id
   network_security_group_id = azurerm_network_security_group.projVnet2Prod_security_group.id
 }
-
