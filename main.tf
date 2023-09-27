@@ -263,39 +263,68 @@ resource "azurerm_network_security_group" "projVnet1Prod_security_group" {
   name                = "NetworkSecurityGroup"
   location            = azurerm_storage_account.azfunction.location
   resource_group_name = azurerm_resource_group.rg.name
-}
+  security_rule {
+    name                       = "NSG-Rule-1"
+    priority                   = 201
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "10.0.1.0/24"
+  }
 
-# allow connections to HTTP from anywhere
-resource "azurerm_network_security_rule" "projVnet1Prod_security_rule1" {
-  name                         = "ProjVnet1Prod_security_rule1"
-  priority                     = 201
-  direction                    = "Inbound"
-  access                       = "Allow"
-  protocol                     = "Tcp"
-  source_port_range            = "*"
-  source_address_prefix        = "*"
-  destination_port_range       = "80"
-  destination_address_prefixes = [0]
-  resource_group_name          = azurerm_resource_group.rg.name
-  network_security_group_name  = azurerm_network_security_group.projVnet1Prod_security_group.name
-}
-
-#allow all TCP outbound traffic to anywhere
-resource "azurerm_network_security_rule" "projVnet1Prod_security_rule2" {
-  name                        = "ProjVnet1Prod_security_rule2"
-  priority                    = 100
-  direction                   = "Outbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  source_address_prefix       = "*"
-  destination_port_range      = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = azurerm_network_security_group.projVnet1Prod_security_group.name
+  security_rule {
+    name                       = "NSG-Rule-2"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "projVnet1Prod_security_group_association" {
   subnet_id                 = azurerm_subnet.azfunction_subnet1.id
   network_security_group_id = azurerm_network_security_group.projVnet1Prod_security_group.id
 }
+
+#Task 17
+
+resource "azurerm_network_security_group" "projVnet2Prod_security_group" {
+  name                = "projVnet2Prod_security_group"
+  location            = azurerm_storage_account.staticweb.location
+  resource_group_name = azurerm_resource_group.rg.name
+  security_rule {
+    name                         = "projVnet2Prod_security_rule1"
+    priority                     = 201
+    direction                    = "Inbound"
+    access                       = "Allow"
+    protocol                     = "Tcp"
+    source_port_range            = "*"
+    destination_port_range       = "80"
+    source_address_prefixes      = azurerm_subnet.staticweb_subnet2.address_prefixes
+    destination_address_prefixes = azurerm_subnet.staticweb_subnet1.address_prefixes
+  }
+
+  security_rule {
+    name                       = "projVnet2Prod_security_rule2"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+resource "azurerm_subnet_network_security_group_association" "projVnet2Prod_security_group_association" {
+  subnet_id                 = azurerm_subnet.staticweb_subnet1.id
+  network_security_group_id = azurerm_network_security_group.projVnet2Prod_security_group.id
+}
+
