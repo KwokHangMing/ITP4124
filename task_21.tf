@@ -73,8 +73,8 @@ resource "azurerm_function_app" "example" {
     "WEBSITE_NODE_DEFAULT_VERSION" = "~16"
   }
   tags = {
-    # AppServicePlan = azurerm_app_service_plan.windows.name
-    # FunctionApp = azurerm_function_app.example.name
+    AppServicePlan = azurerm_app_service_plan.windows.name
+    FunctionApp = "task21-function"
     key = "FunctionApp"
   }
 }
