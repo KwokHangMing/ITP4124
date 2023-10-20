@@ -360,7 +360,7 @@ resource "azurerm_network_security_group" "task18" {
     source_port_range          = "*"
     destination_port_range     = "80"
     source_address_prefix      = "10.1.0.0/24"
-    destination_address_prefix = "10.1.1.0/24"
+    destination_address_prefix = "10.0.0.0/24"
   }
 
   security_rule {
