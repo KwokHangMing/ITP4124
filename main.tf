@@ -90,7 +90,7 @@ resource "azurerm_virtual_network" "azfunction_network" {
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_storage_account.azfunction.location
   resource_group_name = azurerm_resource_group.rg.name
-}
+
 
 resource "azurerm_subnet" "azfunction_subnet1" {
   name                 = "projVnet1Prod_subnet1"
@@ -104,7 +104,7 @@ resource "azurerm_subnet" "azfunction_subnet2" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.azfunction_network.name
   address_prefixes     = ["10.0.0.0/24"]
-}
+
 
 
 #static web virtual network
@@ -285,7 +285,6 @@ resource "azurerm_network_security_group" "projVnet1Prod_security_group" {
     destination_port_range     = "*"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
-  }
 }
 
 resource "azurerm_subnet_network_security_group_association" "projVnet1Prod_security_group_association" {
