@@ -10,6 +10,16 @@
 		"ghcr.io/joshuanianji/devcontainer-features/terraform-cli-persistence:0": {},
 		"ghcr.io/devcontainers/features/azure-cli:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"ms-vscode.azurecli",
+				"ms-azuretools.vscode-docker"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
